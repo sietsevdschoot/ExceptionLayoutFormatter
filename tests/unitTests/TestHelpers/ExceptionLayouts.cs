@@ -3,7 +3,7 @@ using System.Diagnostics;
 using ExceptionLayoutFormatter;
 using ExceptionLayoutFormatter.ExceptionLayouts;
 
-namespace ExceptionLayoutFormatterTests.TestHelpers
+namespace UnitTests.TestHelpers
 {
     [DebuggerStepThrough]
     public class EmptyExceptionLayout : IExceptionLayout<Exception>

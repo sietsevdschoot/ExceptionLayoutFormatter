@@ -4,7 +4,7 @@ using FluentAssertions;
 using FluentAssertions.Collections;
 using FluentAssertions.Equivalency;
 
-namespace ExceptionLayoutFormatterTests.Extensions
+namespace UnitTests.Extensions
 {
     public static class FluentAssertionExtensions
     {

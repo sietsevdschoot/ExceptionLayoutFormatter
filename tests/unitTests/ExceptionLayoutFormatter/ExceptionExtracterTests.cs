@@ -4,11 +4,11 @@ using System.Linq;
 using System.Net.Mail;
 using System.Reflection;
 using ExceptionLayoutFormatter;
-using ExceptionLayoutFormatterTests.Extensions;
 using FluentAssertions;
+using UnitTests.Extensions;
 using Xunit;
 
-namespace ExceptionLayoutFormatterTests
+namespace UnitTests.ExceptionLayoutFormatter
 {
     
     public class ExceptionExtracterTests

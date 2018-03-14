@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace ExceptionLayoutFormatterTests.TestHelpers
+namespace UnitTests.TestHelpers
 {
     [DebuggerStepThrough]
     public class DummyException : Exception

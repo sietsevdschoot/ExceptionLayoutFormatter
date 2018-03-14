@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>ExceptionLayoutFormatterTests</AssemblyName>
+    <AssemblyName>UnitTests</AssemblyName>
 
-    <RootNamespace>ExceptionLayoutFormatterTests</RootNamespace>
+    <RootNamespace>UnitTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

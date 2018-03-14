@@ -3,7 +3,7 @@ using ExceptionLayoutFormatter;
 using FluentAssertions;
 using Xunit;
 
-namespace ExceptionLayoutFormatterTests
+namespace UnitTests.ExceptionLayoutFormatter
 {
     public class ExceptionFormattingUtilTests
     {

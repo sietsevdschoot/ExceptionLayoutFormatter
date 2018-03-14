@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using ExceptionLayoutFormatter;
 using ExceptionLayoutFormatter.ExceptionLayouts;
-using ExceptionLayoutFormatterTests.TestHelpers;
 using FluentAssertions;
+using UnitTests.TestHelpers;
 using Xunit;
 
-namespace ExceptionLayoutFormatterTests
+namespace UnitTests.ExceptionLayoutFormatter
 {
     public class ExceptionFormatterTests
     {
