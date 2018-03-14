@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>ExceptionLayoutFormatter</RootNamespace>
+    <AssemblyName>ExceptionLayoutFormatter</AssemblyName>
+    <Authors>sietsevdschoot</Authors>
+    <Company />
+    <Version>1.0.0.0</Version>
+    <PackageProjectUrl>https://github.com/sietsevdschoot/ExceptionLayoutFormatter</PackageProjectUrl>
+    <Description>Format exceptions and innerExceptions enriched with tailored information per exception type.
+This gives you as developer all the information you need to solve issues.</Description>
+    <PackageTags>Exception Exceptions Logging Logs Layout Formatting Formatter </PackageTags>
+    <Copyright>Copyright 2017</Copyright>
+    <Product>ExceptionFormatter</Product>
+    <PackageId>ExceptionFormatter</PackageId>
+    <PackageLicenseUrl>https://github.com/sietsevdschoot/ExceptionLayoutFormatter/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
