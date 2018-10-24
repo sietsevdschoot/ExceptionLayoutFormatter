@@ -1,12 +1,19 @@
 $solutionRoot = (gi $PSScriptRoot\..\..\).FullName
-$nugetApiKey = (cat "$solutionRoot\..\Credentials\ExceptionLayoutFormatterNuget.txt" -Raw -ErrorAction SilentlyContinue).Trim()
+
+$credentialFile = [IO.FileInfo]"$solutionRoot\..\Credentials\ExceptionLayoutFormatterNuget.txt"
+
+if ($credentialFile.Exists) {
+
+    $nugetApiKey = (Get-Content $credentialFile.FullName -Raw).Trim()
+}
+
 
 Function Get-ProjectInfo {
     param(
         [IO.FileInfo] $projectFile
     ) 
 
-    $nuspecData = ([xml](cat $projectFile)).Project.PropertyGroup
+    $nuspecData = ([xml](Get-Content $projectFile)).Project.PropertyGroup
 
     $packageId = if ($nuspecData.PackageId) { $nuspecData.PackageId } else { $nuspecData.AssemblyName }
 
