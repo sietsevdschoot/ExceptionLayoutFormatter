@@ -44,9 +44,9 @@ namespace ExceptionLayoutFormatter
         public string FormatException(Exception exception)
         {
             var allExceptions = _extractor.ExtractAllExceptions(exception);
-            var formattedExceptionMessage = FormatAllExceptionsToErrorMessage(allExceptions);
+            var formattedExceptionMessages = FormatAllExceptionsToErrorMessage(allExceptions);
 
-            return string.Join(Environment.NewLine, formattedExceptionMessage);
+            return string.Join(Environment.NewLine, formattedExceptionMessages);
         }
 
         public List<string> FormatAllExceptionsToErrorMessage(List<Exception> allExceptions)
