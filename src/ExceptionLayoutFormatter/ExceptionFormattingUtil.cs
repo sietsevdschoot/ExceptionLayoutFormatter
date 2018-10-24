@@ -80,7 +80,7 @@ namespace ExceptionLayoutFormatter
         public void SetLayout(string layout)
         {
             if (string.IsNullOrEmpty(layout))
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(layout));
 
             var foundKeywords = Regex.Matches(layout, "{(.*?)}").Cast<Match>().Select(x => x.Value.Trim('{', '}')).ToList();
 

@@ -136,6 +136,19 @@ namespace UnitTests.ExceptionLayoutFormatter
             actual.Should().MatchEquivalentOf("*MyTest*MyObject*");
         }
 
+        [Fact]
+        public void FormatException_can_handle_null_values()
+        {
+            // Arrange
+            var formatter = ExceptionFormatter.Create();
+
+            // Act
+            var actual = formatter.FormatException(null);
+
+            // Assert
+            actual.Should().BeNullOrEmpty();
+        }
+
         [Serializable]
         internal class Person
         {
@@ -143,6 +156,5 @@ namespace UnitTests.ExceptionLayoutFormatter
             public string Address { get; set; }
             public int[] LuckyNumbers { get; set; }
         }
-
     }
 }
