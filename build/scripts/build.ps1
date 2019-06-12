@@ -100,11 +100,11 @@ Function PublishNewPackage {
         
     $isSuccess = $LASTEXITCODE -eq 0
 
-    $generatedPackage = [IO.Path]::Combine($solutionRoot,"build","$($projectInfo.PackageId).$newVersion.symbols.nupkg")
+    $generatedPackage = [IO.Path]::Combine($solutionRoot,"build","$($projectInfo.PackageId).$newVersion.nupkg")
     
     if ($nugetApiKey) {
 
-        NuGet.exe push $generatedPackage -ApiKey $nugetApiKey -source https://api.nuget.org/v3/index.json | Out-String | Write-Verbose
+        dotnet nuget push $generatedPackage -s https://api.nuget.org/v3/index.json -k $nugetApiKey | Out-String | Write-Verbose
         
         $isSuccess = $isSuccess -and $LASTEXITCODE -eq 0
         
