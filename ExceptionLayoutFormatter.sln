@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E66AD2A3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F3BA116E-8DED-47C6-84FE-D30A51A9A7C7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExceptionLayoutFormatter", "Src\ExceptionLayoutFormatter\ExceptionLayoutFormatter.csproj", "{D215D26D-9C72-4DF0-8553-22894B5A232F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "tests\unitTests\UnitTests.csproj", "{1931BEBE-C175-4DBF-9CA4-6B35252A44B4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{DEBEABE5-B600-4DBD-904A-BFA1C30E14F4}"
