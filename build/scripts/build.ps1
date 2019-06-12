@@ -95,6 +95,7 @@ Function PublishNewPackage {
 
     dotnet pack $($projectFile.FullName) `
         --include-symbols --include-source --no-build `
+		-p:SymbolPackageFormat=snupkg `
         /p:PackageVersion=$newVersion /p:Description=$newDescription --output $solutionRoot\build | Out-String | Write-Verbose
         
     $isSuccess = $LASTEXITCODE -eq 0

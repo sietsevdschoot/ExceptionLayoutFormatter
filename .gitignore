@@ -18,6 +18,7 @@ packages/
 .vs/
 
 build/*.nupkg
+build/*.snupkg
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
