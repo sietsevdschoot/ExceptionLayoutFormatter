@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param(
+	[switch] $pushToNuget
+)
+
 $solutionRoot = (gi $PSScriptRoot\..\..\).FullName
 
 $credentialFile = [IO.FileInfo]"$solutionRoot\..\Credentials\ExceptionLayoutFormatterNuget.txt"
@@ -89,20 +94,21 @@ Function PublishNewPackage {
         $publishedPackage
     )
 
-    $newVersion = Get-NewPackageVersionNumber -currentVersion $($publishedPackage.Version)
+    $newVersion = Get-NewPackageVersionNumber -packageId ($projectInfo.PackageId) -currentVersion $($publishedPackage.Version)
 
     $newDescription = ("{0} | {1}" -f $projectInfo.Description, $projectInfo.Hash) 
 
-    dotnet pack $($projectFile.FullName) `
-        --include-symbols --include-source --no-build `
-		-p:SymbolPackageFormat=snupkg `
-        /p:PackageVersion=$newVersion /p:Description=$newDescription --output $solutionRoot\build | Out-String | Write-Verbose
+    dotnet pack $($projectFile.FullName)`
+        /p:PackageVersion=$newVersion `
+		/p:Description=$newDescription `
+		--no-build `
+		--output $solutionRoot\build | Out-String | Write-Verbose
         
     $isSuccess = $LASTEXITCODE -eq 0
 
     $generatedPackage = [IO.Path]::Combine($solutionRoot,"build","$($projectInfo.PackageId).$newVersion.nupkg")
     
-    if ($nugetApiKey) {
+    if ($nugetApiKey -and $pushToNuget) {
 
         dotnet nuget push $generatedPackage -s https://api.nuget.org/v3/index.json -k $nugetApiKey | Out-String | Write-Verbose
         
@@ -125,12 +131,35 @@ Function PublishNewPackage {
 
 Function Get-NewPackageVersionNumber {
     param (
+		[string] $packageId,
         [string] $currentVersion
     )
 
-    $version = [version]$currentVersion
+    # Configure major and minor version increment bumps
+    $initialVersions = @{
 
-    ("{0}.{1}.{2}.{3}" -f $version.Major, $version.Minor, $version.Build, ([Math]::Max($version.Revision, 0) + 1))
+        "ExceptionFormatter" = "1.0.0.0";
+    }
+
+    if ($currentVersion) {
+    
+        $version = [version]$currentVersion
+    }
+    else {
+        
+        $version = [version] $(if ($initialVersions.ContainsKey($packageId)) { $initialVersions.($packageId) } else { "1.0.0.0" })
+    }
+        
+    if (([version]$initialVersions.($packageId)) -gt $version) {
+    
+        $newVersion = [version]$initialVersions.($packageId)
+    }
+    else {
+    
+        $newVersion = ("{0}.{1}.{2}.{3}" -f $version.Major, $version.Minor, $version.Build, ([Math]::Max($version.Revision, 0) + 1))
+    }
+
+    $newVersion
 }
 
 SkipOrPushNewPackage "$solutionRoot\src\ExceptionLayoutFormatter\ExceptionLayoutFormatter.csproj"

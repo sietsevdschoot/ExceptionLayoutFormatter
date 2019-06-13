@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -27,9 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="xunit.core">
-      <HintPath>..\..\..\..\Users\DBXSVS\.nuget\packages\xunit.extensibility.core\2.3.1\lib\netstandard1.1\xunit.core.dll</HintPath>
-    </Reference>
+    <Reference Include="xunit.core"/>
   </ItemGroup>
 
 </Project>
