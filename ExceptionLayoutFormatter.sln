@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExceptionLayoutFormatter", "src\ExceptionLayoutFormatter\ExceptionLayoutFormatter.csproj", "{E149BA67-6754-480C-A51B-3460283DF60A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTests", "PerformanceTests\PerformanceTests.csproj", "{053E3D32-1A61-4249-B83D-614D47F05287}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{E149BA67-6754-480C-A51B-3460283DF60A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E149BA67-6754-480C-A51B-3460283DF60A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E149BA67-6754-480C-A51B-3460283DF60A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{053E3D32-1A61-4249-B83D-614D47F05287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{053E3D32-1A61-4249-B83D-614D47F05287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{053E3D32-1A61-4249-B83D-614D47F05287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{053E3D32-1A61-4249-B83D-614D47F05287}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{1931BEBE-C175-4DBF-9CA4-6B35252A44B4} = {F3BA116E-8DED-47C6-84FE-D30A51A9A7C7}
 		{DEBEABE5-B600-4DBD-904A-BFA1C30E14F4} = {E66AD2A3-9C5F-4C13-8C5B-44B29D8555C5}
 		{E149BA67-6754-480C-A51B-3460283DF60A} = {D8C70DCD-2466-4304-A753-57E5654CDC68}
+		{053E3D32-1A61-4249-B83D-614D47F05287} = {F3BA116E-8DED-47C6-84FE-D30A51A9A7C7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D4FAB788-63AB-40D3-9D7A-0CC5671942B1}
