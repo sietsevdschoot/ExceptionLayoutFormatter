@@ -49,7 +49,7 @@ namespace ExceptionLayoutFormatter
             return string.Join(Environment.NewLine, formattedExceptionMessages);
         }
 
-        public List<string> FormatAllExceptionsToErrorMessage(List<Exception> allExceptions)
+        private List<string> FormatAllExceptionsToErrorMessage(List<Exception> allExceptions)
         {
             var formattedExceptions = new List<string>();
 
