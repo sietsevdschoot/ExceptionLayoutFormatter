@@ -6,7 +6,7 @@
     <AssemblyName>ExceptionLayoutFormatter</AssemblyName>
     <Authors>sietsevdschoot</Authors>
     <Company />
-    <Version>1.0.0.7</Version>
+    <Version>1.0.0.8</Version>
     <PackageProjectUrl>https://github.com/sietsevdschoot/ExceptionLayoutFormatter</PackageProjectUrl>
     <Description>Format exceptions and innerExceptions enriched with tailored information per exception type.
 This gives you as developer all the information you need to solve issues.</Description>

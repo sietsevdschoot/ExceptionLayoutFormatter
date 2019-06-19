@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace ExceptionLayoutFormatter
@@ -26,27 +27,19 @@ namespace ExceptionLayoutFormatter
 
         private IEnumerable<Exception> GetInnerExceptions(Exception ex)
         {
-            var exceptionsWithInnerExceptions = new List<string>
-            {
-                "System.Reflection.ReflectionTypeLoadException",
-                "System.Net.Mail.SmtpFailedRecipientsException",
-                "System.ComponentModel.Composition.ChangeRejectedException",
-                "System.ComponentModel.Composition.CompositionException",
-            };
-
             IEnumerable<Exception> innerExceptions;
 
-            if (exceptionsWithInnerExceptions.Contains(ex.GetType().FullName))
+            if (ex is AggregateException aggregateException)
             {
-                innerExceptions = (IEnumerable<Exception>)ex.GetType().GetProperties()
-                      .Single(x => typeof(IEnumerable<Exception>).IsAssignableFrom(x.PropertyType))
-                      .GetValue(ex);
+                innerExceptions = aggregateException.InnerExceptions.ToList();
             }
             else
             {
-                innerExceptions = ex is AggregateException aggregateException
-                    ? aggregateException.InnerExceptions.ToList()
-                    : new List<Exception> { ex.InnerException };
+                innerExceptions = ex.GetType().GetProperties()
+                    .Where(x => typeof(IEnumerable<Exception>).IsAssignableFrom(x.PropertyType))
+                    .SelectMany(x => (IEnumerable<Exception>) x.GetValue(ex))
+                    .Concat(new List<Exception> {ex.InnerException})
+                    .Distinct();
             }
 
             return innerExceptions;

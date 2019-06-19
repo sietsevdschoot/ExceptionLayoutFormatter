@@ -39,26 +39,47 @@ namespace UnitTests.ExceptionLayoutFormatter
         }
 
         [Fact]
-        public void ExtractAllExceptions_Can_extract_innerExceptions_from_AggregateException()
+        public void ExtractAllExceptions_Can_extract_nested_innerExceptions()
         {
             // Arrange
-            var ex = new AggregateException("Aggregate", new List<Exception>
+            var ex = new AggregateException("OuterAggregate", new List<Exception>
             {
-                new Exception("Inner 1"),
-                new Exception("Inner 2"),
-                new Exception("Inner 3"),
+                new AggregateException("Inner1", new List<Exception>
+                {
+                    new Exception("Inner1A"),
+                    new Exception("Inner1B"),
+
+                }),
+                new AggregateException("Inner2", new List<Exception>
+                {
+                    new Exception("Inner2A"),
+                    new Exception("Inner2B"),
+
+                }),
+                new AggregateException("Inner3", new List<Exception>
+                {
+                    new Exception("Inner3A"),
+                    new Exception("Inner3B"),
+
+                }),
             });
 
             // Act
-            var actual = _extractor.ExtractAllExceptions(ex);
+            var actual = _extractor.ExtractAllExceptions(ex).Select(x => x.Message).ToList();
 
             // Assert
-            actual.Select(x => x.Message).Should().BeEquivalentUsingWildcards(new List<string>
+            actual.Should().BeEquivalentUsingWildcards(new List<string>
             {
-                "Inner 3",
-                "Inner 2",
-                "Inner 1",
-                "Aggregate*",
+                "Inner3B",
+                "Inner3A",
+                "Inner3 *",
+                "Inner2B",
+                "Inner2A",
+                "Inner2 *",
+                "Inner1B",
+                "Inner1A",
+                "Inner1 *",
+                "OuterAggregate*",
             }, 
             config => config.WithStrictOrderingFor(x => x));
         }
