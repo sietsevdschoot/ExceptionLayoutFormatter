@@ -31,13 +31,4 @@ namespace UnitTests.TestHelpers
             return this.GetType().Name;
         }
     }
-
-    [DebuggerStepThrough]
-    public class GenericTestExceptionLayout<TException> : IExceptionLayout<TException> where TException : Exception
-    {
-        public string FormatException(IFormatter formatter, TException ex)
-        {
-            return typeof(TException).Name;
-        }
-    }
 }

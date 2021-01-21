@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ExceptionLayoutFormatter.ExceptionLayouts;
-using ExceptionLayoutFormatter.Extensions;
 
 namespace ExceptionLayoutFormatter
 {
@@ -18,28 +17,31 @@ namespace ExceptionLayoutFormatter
             AddLayoutFormatter(new ExceptionLayout());
         }
 
-        internal ExceptionLayoutFormatter(IDictionary<Type, IExceptionLayout> formatterInstances) : this()
-        {
-            _layoutFormatterInstances = formatterInstances;
-        }
-
         public void AddLayoutFormatter<TException>(IExceptionLayout<TException> layout) where TException : Exception
         {
             _layoutFormatterInstances[typeof(TException)] = layout;
         }
 
+        public void AddLayoutFormatter(Type exceptionType, IExceptionLayout exceptionLayout)
+        {
+            if (!typeof(Exception).IsAssignableFrom(exceptionType))
+                throw new ArgumentException($"'{exceptionType.Name}' Should be assignable from Exception", nameof(exceptionType));
+
+            _layoutFormatterInstances[exceptionType] = exceptionLayout;
+        }
+
         public void AddExceptionLayouts(Assembly assembly)
         {
             var exceptionLayouts = assembly.GetTypes().Where(x =>
-                x.GetConstructor(Type.EmptyTypes) != null &&
+                x.GetConstructor(Type.EmptyTypes) != null && !x.ContainsGenericParameters &&
                 x.GetInterfaces().Any(i => i == typeof(IExceptionLayout)));
 
             var layoutFormatters = exceptionLayouts.Select(exceptionLayout => new
             {
+                LayoutFormatter = (IExceptionLayout)Activator.CreateInstance(exceptionLayout),
                 ExceptionType = exceptionLayout.GetInterfaces()
                     .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout<>))
-                    .GetGenericArguments()[0],
-                LayoutFormatter = (IExceptionLayout)Activator.CreateInstance(exceptionLayout)
+                    .GetGenericArguments()[0]
             });
 
             foreach (var layoutFormatter in layoutFormatters)
@@ -72,13 +74,23 @@ namespace ExceptionLayoutFormatter
             return formattedException;
         }
 
+        internal List<IExceptionLayout> ExceptionLayouts => _layoutFormatterInstances.Values.ToList();
+
         private IExceptionLayout<TException> FindMatchingLayoutFormatter<TException>() where TException : Exception
         {
+            // Exact match
             var matchingFormatter = _layoutFormatterInstances
+                .Where(x => x.Key == typeof(TException))
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+            // BaseType match
+            matchingFormatter = matchingFormatter ?? _layoutFormatterInstances
                 .Where(x => x.Key != typeof(Exception) && x.Key.IsAssignableFrom(typeof(TException)))
                 .Select(x => x.Value)
                 .FirstOrDefault();
 
+            // Default ExceptionFormatter
             var formatter = matchingFormatter ?? _layoutFormatterInstances[typeof(Exception)];
 
             return (IExceptionLayout<TException>)formatter;

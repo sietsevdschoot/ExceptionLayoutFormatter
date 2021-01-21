@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using ExceptionLayoutFormatter;
-using ExceptionLayoutFormatter.ExceptionLayouts;
 using FluentAssertions;
 using UnitTests.TestHelpers;
 using Xunit;
@@ -29,27 +27,23 @@ namespace UnitTests.ExceptionLayoutFormatter
         public void FormatException_uses_matching_layout()
         {
             // Arrange
-            var formatter = ExceptionFormatter.Create(new Dictionary<Type, IExceptionLayout>
-            {
-                { typeof(DummyException), new DummyExceptionLayout()},
-                { typeof(Exception), new EmptyExceptionLayout()},
-            });
-
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout<DummyExceptionLayout>()
+                .AddExceptionLayout<SubClassedDummyExceptionLayout>()
+                .AddExceptionLayout<EmptyExceptionLayout>();
             // Act
-            var actual = formatter.FormatException(new DummyException());
+            var actual = formatter.FormatException(new SubClassedDummyException());
 
             // Assert
-            actual.Should().MatchEquivalentOf("DummyExceptionLayout*");
+            actual.Should().MatchEquivalentOf("SubClassedDummyException*");
         }
 
         [Fact]
         public void FormatException_when_exceptionType_not_found_uses_baseType_Layout()
         {
             // Arrange
-            var formatter = ExceptionFormatter.Create(new Dictionary<Type, IExceptionLayout>
-            {
-                { typeof(DummyException), new DummyExceptionLayout()}
-            });
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout<DummyExceptionLayout>();
 
             // Act
             var subClassException = new SubClassedDummyException();
@@ -63,10 +57,8 @@ namespace UnitTests.ExceptionLayoutFormatter
         public void FormatException_when_exceptionType_not_found_uses_default_exception_layout()
         {
             // Arrange
-            var formatter = ExceptionFormatter.Create(new Dictionary<Type, IExceptionLayout>
-            {
-                { typeof(Exception), new EmptyExceptionLayout()},
-            });
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout<EmptyExceptionLayout>();
 
             // Act
             var actual = formatter.FormatException(new SubClassedDummyException());
@@ -78,13 +70,13 @@ namespace UnitTests.ExceptionLayoutFormatter
         [Fact]
         public void FormatException_Uses_formatters_for_exceptionTypes()
         {
-            var formatter = ExceptionFormatter.Create(new Dictionary<Type, IExceptionLayout>
-            {
-                { typeof(Exception), new EmptyExceptionLayout()},
-                { typeof(DummyException), new DummyExceptionLayout()}
-            });
-            
-            var ex = new AggregateException(new SubClassedDummyException("", new DummyException("", new Exception())));
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout<DummyExceptionLayout>()
+                .AddExceptionLayout<EmptyExceptionLayout>();
+
+            var ex = new AggregateException(
+                new SubClassedDummyException("", 
+                    new DummyException("", new Exception())));
 
             var names = formatter.FormatException(ex);
 
@@ -147,6 +139,40 @@ namespace UnitTests.ExceptionLayoutFormatter
 
             // Assert
             actual.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void Can_add_exceptionLayouts_by_scanning_assemblies()
+        {
+            // Arrange && Assert
+            var formatter = ExceptionFormatter.Create(this.GetType().Assembly);
+
+            // Assert
+            formatter.ExceptionLayouts.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void AddExceptionLayout_adds_exceptionLayout_to_formatter()
+        {
+            // Arrange && Assert
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout(new EmptyExceptionLayout())
+                .AddExceptionLayout(new DummyExceptionLayout());
+
+            // Assert
+            formatter.ExceptionLayouts.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void AddExceptionLayout_adds_exceptionLayout_to_formatter_using_generics()
+        {
+            // Arrange && Assert
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout<EmptyExceptionLayout>()
+                .AddExceptionLayout<DummyExceptionLayout>();
+
+            // Assert
+            formatter.ExceptionLayouts.Should().HaveCount(2);
         }
 
         [Serializable]

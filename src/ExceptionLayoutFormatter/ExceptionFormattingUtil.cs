@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using ExceptionLayoutFormatter.Extensions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
 
@@ -22,7 +21,11 @@ namespace ExceptionLayoutFormatter
             {
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                ContractResolver = new DefaultContractResolver()
+                ContractResolver = new DefaultContractResolver(),
+                Converters = new List<JsonConverter>
+                {
+                    new StringEnumConverter()
+                }
             };
 
             _keywords = new[] {"ExceptionType", "Message", "Stacktrace", "AdditionalInfo", "Dictionary"};
@@ -45,7 +48,7 @@ namespace ExceptionLayoutFormatter
                 {"Message", ex.Message},
                 {"Stacktrace", ex.StackTrace},
                 {"AdditionalInfo", additionalInfo},
-                {"Dictionary", SerializeDictionary(ex.Data)},
+                {"Dictionary", PrettyPrint(ex.Data)},
             };
 
             var foundKeywords = Regex.Matches(_layout, @"\${(.*?)}").Cast<Match>().Select(x => x.Value).ToList();
@@ -70,7 +73,7 @@ namespace ExceptionLayoutFormatter
             return formattedException;
         }
 
-        public string Serialize<T>(T item)
+        public string PrettyPrint<T>(T item)
         {
             return !Equals(item, default(T))
                 ? JsonConvert.SerializeObject(item, SerializerSettings)
@@ -94,18 +97,6 @@ namespace ExceptionLayoutFormatter
 
             _layout = layout;
         }
-
-        private string SerializeDictionary(IDictionary dict)
-        {
-            var msg = new StringBuilder();
-
-            foreach (DictionaryEntry pair in dict)
-            {
-                msg.AppendLine($"KEY '{Serialize(pair.Key)}':\n{Serialize(pair.Value)}");
-            }
-
-            return msg.ToString();
-        }
     }
 
     public interface IFormatter
@@ -116,7 +107,7 @@ namespace ExceptionLayoutFormatter
         /// </summary>
         /// <param name="layout"></param>
         void SetLayout(string layout);
-        string Serialize<T>(T item);
+        string PrettyPrint<T>(T item);
         string GetFormattedException(Exception ex, IEnumerable<string> additionalInfo);
         string GetFormattedException(Exception ex, string additionalInfo = null);
     }

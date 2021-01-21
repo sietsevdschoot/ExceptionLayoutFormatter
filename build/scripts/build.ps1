@@ -3,7 +3,7 @@ param(
 	[switch] $pushToNuget
 )
 
-$solutionRoot = (gi $PSScriptRoot\..\..\).FullName
+$solutionRoot = Join-Path $PSScriptRoot "..\..\" -Resolve
 
 $credentialFile = [IO.FileInfo]"$solutionRoot\..\Credentials\ExceptionLayoutFormatterNuget.txt"
 
@@ -24,7 +24,7 @@ Function Get-ProjectInfo {
 
     $description = $nuspecData.Description
 
-    $projectDll = (dir "$($projectFile.Directory.FullName)\bin\*.dll" -recurse | Sort -prop CreationTime -desc )[0]
+    $projectDll = (Get-ChildItem "$($projectFile.Directory.FullName)\bin\*.dll" -recurse | Sort-Object -prop CreationTime -Descending)[0]
 
     $projectHash = (Get-FileHash -Algorithm MD5 -Path $projectDll).Hash
 
@@ -44,7 +44,7 @@ function Get-PackageInfoFromFeed {
 
     $response = Invoke-RestMethod -Uri $packageFeed -Verbose:$false
 
-    if ($response.data -eq $null) {
+    if ($null -eq $response.data) {
     
         Throw "No packages found.."
     }
@@ -71,7 +71,7 @@ Function SkipOrPushNewPackage {
         $publishedPackageHash = $null
         if ($publishedPackage.Description.Contains("|")) 
         {
-            $publishedPackageHash = ($publishedPackage.Description.Split("|") | Select -Last 1).Trim()
+            $publishedPackageHash = ($publishedPackage.Description.Split("|") | Select-Object -Last 1).Trim()
         }
         
         #if the hash no longer matches, we should push a new package
@@ -116,11 +116,11 @@ Function PublishNewPackage {
         
         if ($isSuccess) {
         
-            Write-Host " [DONE] Pushed $($projectInfo.PackageId) $newVersion $(($newDescription.Split('|') | Select -Last 1).Trim()) to NuGet Feed"  
+            Write-Host " [DONE] Pushed $($projectInfo.PackageId) $newVersion $(($newDescription.Split('|') | Select-Object -Last 1).Trim()) to NuGet Feed"  
         }
         else {
         
-            Write-Host " [FAIL] Creating / Pushing $($projectInfo.PackageId) $newVersion $(($newDescription.Split('|') | Select -Last 1).Trim()) "  
+            Write-Host " [FAIL] Creating / Pushing $($projectInfo.PackageId) $newVersion $(($newDescription.Split('|') | Select-Object -Last 1).Trim()) "  
         }
     }
     elseif ($isSuccess) {
