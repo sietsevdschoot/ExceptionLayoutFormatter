@@ -14,7 +14,6 @@ namespace UnitTests.TestHelpers
         public DummyException()
         {
         }
-
     }
 
     [DebuggerStepThrough]

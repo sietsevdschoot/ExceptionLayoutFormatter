@@ -1,16 +1,15 @@
-﻿
+
+
 # ExceptionFormatter
-Exception formatter allows you to format exceptions in a readable way, containing helpful additional information that specialized exceptions may hold.
+ExceptionFormatter renders exceptions in a readable way. Containing important addiditional information which specialized exceptions may provide.
 
-This allows you to get detailed exception messages, but also provide context that nested exceptions provide.
-
-Exception.GetBaseException() only returns the most innerException, which my lose contextual information that outer exceptions provide.
+This allows you to get detailed exception messages together with all information nested exceptions may hold.
 
 ##### Features:
 * Formats all nested- and child exception in order of relevance, Inner exceptions first, outer exception last.
 * Adding important value by serializing specific metadata of specialized Exceptions. 
-* Provides an easy to extend way to format exceptions in user preferred ways.  
-
+* Provides an easy extendable way to format exceptions according to preference.  
+* Robust implementation with fallback if any error occurs.
 
 ### How to use
 

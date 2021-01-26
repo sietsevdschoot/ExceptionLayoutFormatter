@@ -39,6 +39,7 @@ namespace ExceptionLayoutFormatter
             var layoutFormatters = exceptionLayouts.Select(exceptionLayout => new
             {
                 LayoutFormatter = (IExceptionLayout)Activator.CreateInstance(exceptionLayout),
+
                 ExceptionType = exceptionLayout.GetInterfaces()
                     .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout<>))
                     .GetGenericArguments()[0]

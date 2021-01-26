@@ -11,11 +11,11 @@ using Xunit;
 namespace UnitTests.ExceptionLayoutFormatter
 {
     
-    public class ExceptionExtracterTests
+    public class ExceptionExtractorTests
     {
         private readonly ExceptionExtractor _extractor;
 
-        public ExceptionExtracterTests()
+        public ExceptionExtractorTests()
         {
             _extractor = new ExceptionExtractor();
         }

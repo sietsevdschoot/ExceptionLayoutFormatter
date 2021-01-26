@@ -31,6 +31,7 @@ namespace UnitTests.ExceptionLayoutFormatter
                 .AddExceptionLayout<DummyExceptionLayout>()
                 .AddExceptionLayout<SubClassedDummyExceptionLayout>()
                 .AddExceptionLayout<EmptyExceptionLayout>();
+
             // Act
             var actual = formatter.FormatException(new SubClassedDummyException());
 
@@ -72,6 +73,7 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             var formatter = ExceptionFormatter.Create()
                 .AddExceptionLayout<DummyExceptionLayout>()
+                .AddExceptionLayout<SubClassedDummyExceptionLayout>()
                 .AddExceptionLayout<EmptyExceptionLayout>();
 
             var ex = new AggregateException(
@@ -86,7 +88,7 @@ namespace UnitTests.ExceptionLayoutFormatter
             (
                 "EmptyExceptionLayout",
                 "DummyExceptionLayout",
-                "DummyExceptionLayout",
+                "SubClassedDummyExceptionLayout",
                 "EmptyExceptionLayout"
             );
         }

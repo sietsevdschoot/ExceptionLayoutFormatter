@@ -56,23 +56,17 @@ namespace ExceptionLayoutFormatter
         public string FormatException(Exception exception)
         {
             var allExceptions = _extractor.ExtractAllExceptions(exception);
-            var formattedExceptionMessages = FormatAllExceptionsToErrorMessages(allExceptions);
 
-            return string.Join(Environment.NewLine, formattedExceptionMessages);
+            var formattedExceptions = new List<string>();
+
+            foreach (dynamic ex in allExceptions)
+            {
+                formattedExceptions.Add(_formatter.CreateFormattedExceptionString(ex));
+            }
+
+            return string.Join(Environment.NewLine, formattedExceptions);
         }
 
         internal List<IExceptionLayout> ExceptionLayouts => _formatter.ExceptionLayouts;
-
-        private List<string> FormatAllExceptionsToErrorMessages(List<Exception> allExceptions)
-        {
-            var formattedExceptions = new List<string>();
-
-            foreach (dynamic exception in allExceptions)
-            {
-                formattedExceptions.Add(_formatter.CreateFormattedExceptionString(exception));
-            }
-
-            return formattedExceptions;
-        }
     }
 }

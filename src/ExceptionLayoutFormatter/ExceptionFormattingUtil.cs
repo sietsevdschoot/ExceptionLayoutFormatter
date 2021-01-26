@@ -13,7 +13,8 @@ namespace ExceptionLayoutFormatter
     public class ExceptionFormattingUtil : IFormatter
     {
         private string _layout;
-        private readonly string[] _keywords;
+
+        private readonly Dictionary<string, Func<Exception, string, string>> _keywords;
 
         public ExceptionFormattingUtil()
         {
@@ -28,7 +29,14 @@ namespace ExceptionLayoutFormatter
                 }
             };
 
-            _keywords = new[] {"ExceptionType", "Message", "Stacktrace", "AdditionalInfo", "Dictionary"};
+            _keywords = new Dictionary<string, Func<Exception, string, string>>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                {"ExceptionType", (ex, extraInfo) => ex.GetType().GetTypeName()},
+                {"Message", (ex, extraInfo) => ex.Message},
+                {"Stacktrace", (ex, extraInfo) => ex.StackTrace},
+                {"AdditionalInfo", (ex, extraInfo) => extraInfo},
+                {"Dictionary", (ex, extraInfo) => PrettyPrint(ex.Data)},
+            };
 
             SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
         }
@@ -42,22 +50,14 @@ namespace ExceptionLayoutFormatter
 
         public string GetFormattedException(Exception ex, string additionalInfo = null)
         {
-            var dict = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {"ExceptionType", ex.GetType().GetTypeName()},
-                {"Message", ex.Message},
-                {"Stacktrace", ex.StackTrace},
-                {"AdditionalInfo", additionalInfo},
-                {"Dictionary", PrettyPrint(ex.Data)},
-            };
+            var formattedException = _layout;
 
             var foundKeywords = Regex.Matches(_layout, @"\${(.*?)}").Cast<Match>().Select(x => x.Value).ToList();
 
-            var formattedException = _layout;
-
             foreach (var foundKeyword in foundKeywords)
             {
-                var value = dict[foundKeyword.Trim('$','{', '}')];
+                var keyWordEntry = _keywords[foundKeyword.Trim('$', '{', '}')];
+                var value = keyWordEntry.Invoke(ex, additionalInfo);
 
                 if (!string.IsNullOrEmpty(value))
                 {
@@ -90,7 +90,7 @@ namespace ExceptionLayoutFormatter
             if (foundKeywords.GroupBy(x => x).Any(x => x.Count() > 1))
                 throw new ArgumentException($"Duplicate keywords found in: {string.Join(", ", foundKeywords)}");
 
-            var unknownKeywords = foundKeywords.Where(x => !_keywords.Contains(x, StringComparer.InvariantCultureIgnoreCase)).ToList();
+            var unknownKeywords = foundKeywords.Where(x => !_keywords.Keys.Contains(x, StringComparer.InvariantCultureIgnoreCase)).ToList();
 
             if (unknownKeywords.Any())
                 throw new ArgumentException($"Unknown keywords: {string.Join(", ", unknownKeywords)}");        
