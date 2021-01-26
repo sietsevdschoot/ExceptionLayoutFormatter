@@ -8,7 +8,7 @@ namespace ExceptionLayoutFormatter.Extensions
         internal static string GetTypeName(this Type type)
         {
             string name;
-            if (type.IsGenericType  && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 name = $"{GetTypeName(type.GetGenericArguments()[0])}?";
             }

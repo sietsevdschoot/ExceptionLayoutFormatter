@@ -22,14 +22,6 @@ namespace ExceptionLayoutFormatter
             _layoutFormatterInstances[typeof(TException)] = layout;
         }
 
-        public void AddLayoutFormatter(Type exceptionType, IExceptionLayout exceptionLayout)
-        {
-            if (!typeof(Exception).IsAssignableFrom(exceptionType))
-                throw new ArgumentException($"'{exceptionType.Name}' Should be assignable from Exception", nameof(exceptionType));
-
-            _layoutFormatterInstances[exceptionType] = exceptionLayout;
-        }
-
         public void AddExceptionLayouts(Assembly assembly)
         {
             var exceptionLayouts = assembly.GetTypes().Where(x =>
