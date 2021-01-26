@@ -6,7 +6,7 @@ using ExceptionLayoutFormatter.ExceptionLayouts;
 namespace UnitTests.TestHelpers
 {
     [DebuggerStepThrough]
-    public class EmptyExceptionLayout : IExceptionLayout<Exception>
+    public class DefaultExceptionLayout : IExceptionLayout<Exception>
     {
         public string FormatException(IFormatter formatter, Exception ex)
         {
@@ -15,18 +15,18 @@ namespace UnitTests.TestHelpers
     }
 
     [DebuggerStepThrough]
-    public class DummyExceptionLayout : IExceptionLayout<DummyException>
+    public class CustomerExceptionLayout : IExceptionLayout<CustomerException>
     {
-        public string FormatException(IFormatter formatter, DummyException ex)
+        public string FormatException(IFormatter formatter, CustomerException ex)
         {
             return this.GetType().Name;
         }
     }
 
     [DebuggerStepThrough]
-    public class SubClassedDummyExceptionLayout : IExceptionLayout<SubClassedDummyException>
+    public class CustomerNotFoundExceptionLayout : IExceptionLayout<CustomerNotFoundException>
     {
-        public string FormatException(IFormatter formatter, SubClassedDummyException ex)
+        public string FormatException(IFormatter formatter, CustomerNotFoundException ex)
         {
             return this.GetType().Name;
         }

@@ -4,28 +4,28 @@ using System.Diagnostics;
 namespace UnitTests.TestHelpers
 {
     [DebuggerStepThrough]
-    public class DummyException : Exception
+    public class CustomerException : Exception
     {
-        public DummyException(string message, Exception innerException)
+        public CustomerException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        public DummyException()
+        public CustomerException()
         {
         }
     }
 
     [DebuggerStepThrough]
-    public class SubClassedDummyException : DummyException
+    public class CustomerNotFoundException : CustomerException
     {
-        public SubClassedDummyException(string message, Exception innerException)
+        public CustomerNotFoundException(string message, Exception innerException)
             : base(message, innerException)
         {
 
         }
 
-        public SubClassedDummyException()
+        public CustomerNotFoundException()
         {
         }
 

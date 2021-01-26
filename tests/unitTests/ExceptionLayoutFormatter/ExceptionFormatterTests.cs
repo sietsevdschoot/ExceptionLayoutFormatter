@@ -28,15 +28,15 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new DummyExceptionLayout())
-                .AddExceptionLayout(new SubClassedDummyExceptionLayout())
-                .AddExceptionLayout(new EmptyExceptionLayout());
+                .AddExceptionLayout(new CustomerExceptionLayout())
+                .AddExceptionLayout(new CustomerNotFoundExceptionLayout())
+                .AddExceptionLayout(new DefaultExceptionLayout());
 
             // Act
-            var actual = formatter.FormatException(new SubClassedDummyException());
+            var actual = formatter.FormatException(new CustomerNotFoundException());
 
             // Assert
-            actual.Should().MatchEquivalentOf("SubClassedDummyException*");
+            actual.Should().MatchEquivalentOf("CustomerNotFoundException*");
         }
 
         [Fact]
@@ -44,14 +44,14 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new DummyExceptionLayout());
+                .AddExceptionLayout(new CustomerExceptionLayout());
 
             // Act
-            var subClassException = new SubClassedDummyException();
+            var subClassException = new CustomerNotFoundException();
             var actual = formatter.FormatException(subClassException);
 
             // Assert
-            actual.Should().MatchEquivalentOf("DummyExceptionLayout*");
+            actual.Should().MatchEquivalentOf("CustomerExceptionLayout*");
         }
 
         [Fact]
@@ -59,26 +59,26 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new EmptyExceptionLayout());
+                .AddExceptionLayout(new DefaultExceptionLayout());
 
             // Act
-            var actual = formatter.FormatException(new SubClassedDummyException());
+            var actual = formatter.FormatException(new CustomerNotFoundException());
 
             // Assert
-            actual.Should().MatchEquivalentOf("EmptyExceptionLayout*");
+            actual.Should().MatchEquivalentOf("DefaultExceptionLayout*");
         }
 
         [Fact]
         public void FormatException_Uses_formatters_for_exceptionTypes()
         {
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new DummyExceptionLayout())
-                .AddExceptionLayout(new SubClassedDummyExceptionLayout())
-                .AddExceptionLayout(new EmptyExceptionLayout());
+                .AddExceptionLayout(new CustomerExceptionLayout())
+                .AddExceptionLayout(new CustomerNotFoundExceptionLayout())
+                .AddExceptionLayout(new DefaultExceptionLayout());
 
             var ex = new AggregateException(
-                new SubClassedDummyException("", 
-                    new DummyException("", new Exception())));
+                new CustomerNotFoundException("", 
+                    new CustomerException("", new Exception())));
 
             var names = formatter.FormatException(ex);
 
@@ -86,10 +86,10 @@ namespace UnitTests.ExceptionLayoutFormatter
                 .Split(new []{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
                 .Should().ContainInOrder
             (
-                "EmptyExceptionLayout",
-                "DummyExceptionLayout",
-                "SubClassedDummyExceptionLayout",
-                "EmptyExceptionLayout"
+                "DefaultExceptionLayout",
+                "CustomerExceptionLayout",
+                "CustomerNotFoundExceptionLayout",
+                "DefaultExceptionLayout"
             );
         }
 
@@ -158,8 +158,8 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange && Assert
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new EmptyExceptionLayout())
-                .AddExceptionLayout(new DummyExceptionLayout());
+                .AddExceptionLayout(new DefaultExceptionLayout())
+                .AddExceptionLayout(new CustomerExceptionLayout());
 
             // Assert
             formatter.ExceptionLayouts.Should().HaveCount(2);
@@ -170,8 +170,8 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange && Assert
             var formatter = ExceptionFormatter.Create()
-                    .AddExceptionLayout(new EmptyExceptionLayout())
-                    .AddExceptionLayout(new DummyExceptionLayout());
+                .AddExceptionLayout(new DefaultExceptionLayout())
+                .AddExceptionLayout(new CustomerExceptionLayout());
 
             // Assert
             formatter.ExceptionLayouts.Should().HaveCount(2);
