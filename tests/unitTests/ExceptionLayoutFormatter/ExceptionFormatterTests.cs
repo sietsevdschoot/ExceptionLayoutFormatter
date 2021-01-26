@@ -165,18 +165,6 @@ namespace UnitTests.ExceptionLayoutFormatter
             formatter.ExceptionLayouts.Should().HaveCount(2);
         }
 
-        [Fact]
-        public void AddExceptionLayout_adds_exceptionLayout_to_formatter_using_generics()
-        {
-            // Arrange && Assert
-            var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout(new DefaultExceptionLayout())
-                .AddExceptionLayout(new CustomerExceptionLayout());
-
-            // Assert
-            formatter.ExceptionLayouts.Should().HaveCount(2);
-        }
-
         [Serializable]
         internal class Person
         {
