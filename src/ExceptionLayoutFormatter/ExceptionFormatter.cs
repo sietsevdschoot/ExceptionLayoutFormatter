@@ -36,23 +36,6 @@ namespace ExceptionLayoutFormatter
             return this;
         }
 
-        public ExceptionFormatter AddExceptionLayout<TExceptionLayout>()
-            where TExceptionLayout : IExceptionLayout, new()
-        {
-            if (!typeof(TExceptionLayout).GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout<>)))
-                throw new ArgumentException("ExceptionLayout should implement IExceptionLayout<>", nameof(TExceptionLayout));
-
-            var exceptionLayout = new TExceptionLayout();
-
-            var exceptionType = typeof(TExceptionLayout).GetInterfaces()
-               .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout<>))
-               .GetGenericArguments()[0];
-
-            _formatter.AddLayoutFormatter(exceptionType, exceptionLayout);
-
-            return this;
-        }
-
         public string FormatException(Exception exception)
         {
             var allExceptions = _extractor.ExtractAllExceptions(exception);

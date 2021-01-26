@@ -28,9 +28,9 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout<DummyExceptionLayout>()
-                .AddExceptionLayout<SubClassedDummyExceptionLayout>()
-                .AddExceptionLayout<EmptyExceptionLayout>();
+                .AddExceptionLayout(new DummyExceptionLayout())
+                .AddExceptionLayout(new SubClassedDummyExceptionLayout())
+                .AddExceptionLayout(new EmptyExceptionLayout());
 
             // Act
             var actual = formatter.FormatException(new SubClassedDummyException());
@@ -44,7 +44,7 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout<DummyExceptionLayout>();
+                .AddExceptionLayout(new DummyExceptionLayout());
 
             // Act
             var subClassException = new SubClassedDummyException();
@@ -59,7 +59,7 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout<EmptyExceptionLayout>();
+                .AddExceptionLayout(new EmptyExceptionLayout());
 
             // Act
             var actual = formatter.FormatException(new SubClassedDummyException());
@@ -72,9 +72,9 @@ namespace UnitTests.ExceptionLayoutFormatter
         public void FormatException_Uses_formatters_for_exceptionTypes()
         {
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout<DummyExceptionLayout>()
-                .AddExceptionLayout<SubClassedDummyExceptionLayout>()
-                .AddExceptionLayout<EmptyExceptionLayout>();
+                .AddExceptionLayout(new DummyExceptionLayout())
+                .AddExceptionLayout(new SubClassedDummyExceptionLayout())
+                .AddExceptionLayout(new EmptyExceptionLayout());
 
             var ex = new AggregateException(
                 new SubClassedDummyException("", 
@@ -170,8 +170,8 @@ namespace UnitTests.ExceptionLayoutFormatter
         {
             // Arrange && Assert
             var formatter = ExceptionFormatter.Create()
-                .AddExceptionLayout<EmptyExceptionLayout>()
-                .AddExceptionLayout<DummyExceptionLayout>();
+                    .AddExceptionLayout(new EmptyExceptionLayout())
+                    .AddExceptionLayout(new DummyExceptionLayout());
 
             // Assert
             formatter.ExceptionLayouts.Should().HaveCount(2);
