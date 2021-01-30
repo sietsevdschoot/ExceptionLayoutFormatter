@@ -14,7 +14,7 @@ namespace ExceptionLayoutFormatter
     {
         private string _layout;
 
-        private readonly Dictionary<string, Func<Exception, string, string>> _keywords;
+        private readonly Dictionary<string, Func<(Exception Exception, string AdditionalInfo), string>> _keywords;
 
         public ExceptionFormattingUtil()
         {
@@ -29,13 +29,13 @@ namespace ExceptionLayoutFormatter
                 }
             };
 
-            _keywords = new Dictionary<string, Func<Exception, string, string>>(StringComparer.InvariantCultureIgnoreCase)
+            _keywords = new Dictionary<string, Func<(Exception Exception, string AdditionalInfo), string>>(StringComparer.InvariantCultureIgnoreCase)
             {
-                {"ExceptionType", (ex, extraInfo) => ex.GetType().GetTypeName()},
-                {"Message", (ex, extraInfo) => ex.Message},
-                {"Stacktrace", (ex, extraInfo) => ex.StackTrace},
-                {"AdditionalInfo", (ex, extraInfo) => extraInfo},
-                {"Dictionary", (ex, extraInfo) => PrettyPrint(ex.Data)},
+                {"ExceptionType", x => x.Exception.GetType().GetTypeName()},
+                {"Message", x => x.Exception.Message},
+                {"Stacktrace", x => x.Exception.StackTrace},
+                {"AdditionalInfo", x => x.AdditionalInfo},
+                {"Dictionary", x => PrettyPrint(x.Exception.Data)},
             };
 
             SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
@@ -57,7 +57,7 @@ namespace ExceptionLayoutFormatter
             foreach (var foundKeyword in foundKeywords)
             {
                 var keyWordEntry = _keywords[foundKeyword.Trim('$', '{', '}')];
-                var value = keyWordEntry.Invoke(ex, additionalInfo);
+                var value = keyWordEntry.Invoke((ex, additionalInfo));
 
                 if (!string.IsNullOrEmpty(value))
                 {

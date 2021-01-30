@@ -132,11 +132,13 @@ Available text renderers:
 
             try
             {
-                string PrettyPrint(PropertyValues props) => formatter.PrettyPrint(props.ToObject());
-
                 validationErrors.AddRange(ex.Entries.Select(x => x.State == EntityState.Added
-                    ? $@"Current:\n\n{PrettyPrint(x.CurrentValues)}"
-                    : $@"Original:\n\n{PrettyPrint(x.OriginalValues)}\n\n\Current:\n\n{PrettyPrint(x.CurrentValues)} "));
+                    ? formatter.PrettyPrint(new { Current = x.CurrentValues.ToObject() })
+                    : formatter.PrettyPrint(new 
+                    {
+                        Current = x.CurrentValues.ToObject(), 
+                        Original = x.OriginalValues.ToObject()
+                    })));
             }
             catch (Exception e)
             {

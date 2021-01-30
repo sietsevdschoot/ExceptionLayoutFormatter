@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ExceptionLayoutFormatter.Extensions
 {
@@ -15,7 +16,7 @@ namespace ExceptionLayoutFormatter.Extensions
             else if (type.IsGenericType)
             {
                 name = $"{type.Name}<{string.Join(", ", type.GetGenericArguments().Select(GetTypeName))}>";
-                name = name.Replace(name.Substring(name.IndexOf('`'), 2), string.Empty);
+                name = Regex.Replace(name, @"`\w+", string.Empty);
             }
             else
             {
