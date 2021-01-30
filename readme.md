@@ -9,72 +9,7 @@ This allows you to get detailed exception messages together with all valuable in
 * Provides an easy extendable way to format exceptions according to preference.  
 * Robust implementation with fallback if any error occurs.
 
-### How to use
-To implement a layout for a given exception you have to implement the ```IExceptionLayout<TException>``` interface.
-
-```csharp
-    public interface IExceptionLayout<in TException> : IExceptionLayout
-        where TException : Exception
-    {
-        string FormatException(IFormatter formatter, TException ex);
-    }
-```
-### Exception layouts and Extensibility
-
-The responsibility of an exceptionLayout is to render a string given an exception. 
-ExceptionLayout uses NLog style renders: The following line is used as default.  
-
-```csharp
-formatter.SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
-```
-
-Available text renderers:
-
-| 				 |   								    |
-| -------------- | ------------------------------------ |
-| exceptionType  |	exceptionTypeName					|
-| message	     |  ex.Message							|
-| stackTrace	 |  ex.StackTrace						|
-| dictionary	 |  ex.Data								|
-| additionalInfo |  specific information about the exception   |
-
-To make this job easier a FormatterUtil is provided:
-
-```csharp
-    public interface IFormatter
-    {
-        JsonSerializerSettings SerializerSettings { get; }
-        void SetLayout(string layout);
-        string PrettyPrint<T>(T item);
-        string GetFormattedException(Exception ex, IEnumerable<string> additionalInfo);
-        string GetFormattedException(Exception ex, string additionalInfo = null);
-    }
-```
-
-An ExceptionLayout could look like this:
-
-```csharp
-    public class DbEntityValidationExceptionLayout : IExceptionLayout<DbEntityValidationException>
-    {
-        public string FormatException(IFormatter formatter, DbEntityValidationException ex)
-        {
-            var entityValidationMessages = ex.EntityValidationErrors
-                .Where(x => !x.IsValid)
-                .Select(x => formatter.PrettyPrint(new
-                {
-                   ValidationErrors = x.ValidationErrors.Select(e => new
-                   {
-                       Property = $"{x.Entry.Entity.GetType().Name}.{e.PropertyName}",
-                       Error = e.ErrorMessage
-                   }),
-                   Entity = x.Entry.Entity
-                }
-                ));
- 
-            return formatter.GetFormattedException(ex, entityValidationMessages);
-        }
-    }
-```
+## How to use
 
 Use ExceptionLayoutFormatter by adding an extension class for Exceptions.
 
@@ -109,7 +44,72 @@ ExceptionFormatter.Create()
     .AddExceptionLayout(new DbEntityValidationExceptionLayout()); 
 ```
 
-## ExceptionLayout Samples
+### Adding custom  ExceptionLayouts
+
+To implement a layout for a given exception you have to implement the ```IExceptionLayout<TException>``` interface.
+
+```csharp
+    public interface IExceptionLayout<in TException> : IExceptionLayout
+        where TException : Exception
+    {
+        string FormatException(IFormatter formatter, TException ex);
+    }
+```
+The responsibility of an exceptionLayout is to render a string given an exception. 
+
+
+
+```csharp
+    public interface IFormatter
+    {
+        JsonSerializerSettings SerializerSettings { get; }
+        void SetLayout(string layout);
+        string PrettyPrint<T>(T item);
+        string GetFormattedException(Exception ex, IEnumerable<string> additionalInfo);
+        string GetFormattedException(Exception ex, string additionalInfo = null);
+    }
+```
+
+ExceptionLayout uses NLog style renders: The following line is used as default.  
+
+```csharp
+formatter.SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
+```
+
+Available text renderers:
+
+|				 |   								    |
+| -------------- | ------------------------------------ |
+| exceptionType  |	exceptionTypeName					|
+| message	     |  ex.Message							|
+| stackTrace	 |  ex.StackTrace						|
+| dictionary	 |  ex.Data								|
+| additionalInfo |  specific information about the exception   |
+
+### ExceptionLayout Samples
+
+```csharp
+    public class DbEntityValidationExceptionLayout : IExceptionLayout<DbEntityValidationException>
+    {
+        public string FormatException(IFormatter formatter, DbEntityValidationException ex)
+        {
+            var entityValidationMessages = ex.EntityValidationErrors
+                .Where(x => !x.IsValid)
+                .Select(x => formatter.PrettyPrint(new
+                {
+                   ValidationErrors = x.ValidationErrors.Select(e => new
+                   {
+                       Property = $"{x.Entry.Entity.GetType().Name}.{e.PropertyName}",
+                       Error = e.ErrorMessage
+                   }),
+                   Entity = x.Entry.Entity
+                }
+                ));
+ 
+            return formatter.GetFormattedException(ex, entityValidationMessages);
+        }
+    }
+```
 
 ```csharp
     public class OptimisticConcurrencyExceptionLayout : IExceptionLayout<OptimisticConcurrencyException>
