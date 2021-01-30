@@ -1,9 +1,7 @@
-
-
 # ExceptionFormatter
-ExceptionFormatter renders exceptions in a readable way. Containing important addiditional information which specialized exceptions may provide.
+ExceptionFormatter renders exceptions in a readable way. Containing important additional information which specialized exceptions may provide.
 
-This allows you to get detailed exception messages together with all information nested exceptions may hold.
+This allows you to get detailed exception messages together with all valuable information nested exceptions may hold.
 
 ##### Features:
 * Formats all nested- and child exception in order of relevance, Inner exceptions first, outer exception last.
@@ -12,93 +10,74 @@ This allows you to get detailed exception messages together with all information
 * Robust implementation with fallback if any error occurs.
 
 ### How to use
+To implement a layout for a given exception you have to implement the ```IExceptionLayout<TException>``` interface.
 
-To use ExceptionLayoutFormatter, add an extension class for Exceptions like the sample below.
 ```csharp
-    using ExceptionLayoutFormatter;
-
-    public static class ExceptionExtensions
+    public interface IExceptionLayout<in TException> : IExceptionLayout
+        where TException : Exception
     {
-        private static readonly ExceptionFormatter ExceptionFormatter;
-
-        static ExceptionExtensions()
-        {
-            ExceptionFormatter = ExceptionFormatter.Create();
-        }
-
-        public static string FormatException(this Exception ex)
-        {
-            return ExceptionFormatter.FormatException(ex);
-        }
+        string FormatException(IFormatter formatter, TException ex);
     }
 ```
-
 ### Exception layouts and Extensibility
 
-Exceptions are formatted using Exception layouts.
-
-The sole purpose for an ExceptionLayout is to render a string given an exception
-
-```csharp
-public class OptimisticConcurrencyExceptionLayout : IExceptionLayout<OptimisticConcurrencyException>
-{
-	public string FormatException(IFormatter formatter, OptimisticConcurrencyException ex)
-	{
-		var entities = ex.StateEntries.Select(x => formatter.Serialize(x.Entity));
-
-		return formatter.GetFormattedException(ex, entities);
-	}
-}
-```
-ExceptionLayouts can be added by passing in one or more assemblies to scan for exception layouts
-
-```csharp 
-ExceptionFormatter.Create(typeof(OptimisticConcurrencyExceptionLayout).Assembly); 
-```
-ExceptionLayouts allow for NLog style text renderers.
-The sample below shows the default formatting:
+The responsibility of an exceptionLayout is to render a string given an exception. 
+ExceptionLayout uses NLog style renders: The following line is used as default.  
 
 ```csharp
 formatter.SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
 ```
 
-#### Text Renderers
+Available text renderers:
 
-Text renderers should be written as ```${renderer}```
+| 				 |   								    |
+| -------------- | ------------------------------------ |
+| exceptionType  |	exceptionTypeName					|
+| message	     |  ex.Message							|
+| stackTrace	 |  ex.StackTrace						|
+| dictionary	 |  ex.Data								|
+| additionalInfo |  specific information about the exception   |
 
-# ExceptionFormatter
-ExceptionFormatter renders exceptions in a readable way. Containing important addiditional information which specialized exceptions may provide.
-
-This allows you to get detailed exception messages together with all information nested exceptions may hold.
-
-##### Features:
-* Formats all nested- and child exception in order of relevance, Inner exceptions first, outer exception last.
-* Adding important value by serializing specific metadata of specialized Exceptions. 
-* Provides an easy extendable way to format exceptions according to preference.  
-* Robust implementation with fallback if any error occurs.
-
-### How to use
-
-To create a new exception layout for an exception type you have to Implement the ```IExceptionLayout<TException>```  interface.
-
+To make this job easier a FormatterUtil is provided:
 
 ```csharp
-public class OptimisticConcurrencyExceptionLayout : IExceptionLayout<OptimisticConcurrencyException>
-{
-   public string FormatException(IFormatter formatter, OptimisticConcurrencyException ex)
-   {
-	var entities = ex.StateEntries.Select(x => formatter.Serialize(x.Entity));
-
-	return formatter.GetFormattedException(ex, entities);
-   }
-}
+    public interface IFormatter
+    {
+        JsonSerializerSettings SerializerSettings { get; }
+        void SetLayout(string layout);
+        string PrettyPrint<T>(T item);
+        string GetFormattedException(Exception ex, IEnumerable<string> additionalInfo);
+        string GetFormattedException(Exception ex, string additionalInfo = null);
+    }
 ```
 
+An ExceptionLayout could look like this:
 
+```csharp
+    public class DbEntityValidationExceptionLayout : IExceptionLayout<DbEntityValidationException>
+    {
+        public string FormatException(IFormatter formatter, DbEntityValidationException ex)
+        {
+            var entityValidationMessages = ex.EntityValidationErrors
+                .Where(x => !x.IsValid)
+                .Select(x => formatter.PrettyPrint(new
+                {
+                   ValidationErrors = x.ValidationErrors.Select(e => new
+                   {
+                       Property = $"{x.Entry.Entity.GetType().Name}.{e.PropertyName}",
+                       Error = e.ErrorMessage
+                   }),
+                   Entity = x.Entry.Entity
+                }
+                ));
  
+            return formatter.GetFormattedException(ex, entityValidationMessages);
+        }
+    }
+```
 
+Use ExceptionLayoutFormatter by adding an extension class for Exceptions.
 
-To use ExceptionLayoutFormatter, add an extension class for Exceptions like the sample below.
 ```csharp
     using ExceptionLayoutFormatter;
 
@@ -117,57 +96,79 @@ To use ExceptionLayoutFormatter, add an extension class for Exceptions like the 
         }
     }
 ```
-
-### Exception layouts and Extensibility
-
-Exceptions are formatted using Exception layouts.
-
-The sole purpose for an ExceptionLayout is to render a string given an exception
-
-```csharp
-public class OptimisticConcurrencyExceptionLayout : IExceptionLayout<OptimisticConcurrencyException>
-{
-	public string FormatException(IFormatter formatter, OptimisticConcurrencyException ex)
-	{
-		var entities = ex.StateEntries.Select(x => formatter.Serialize(x.Entity));
-
-		return formatter.GetFormattedException(ex, entities);
-	}
-}
-```
-ExceptionLayouts can be added by passing in one or more assemblies to scan for exception layouts
+Custom ExceptionLayouts can be added by scanning one or more assemblies.
 
 ```csharp 
 ExceptionFormatter.Create(typeof(OptimisticConcurrencyExceptionLayout).Assembly); 
 ```
-ExceptionLayouts allow for NLog style text renderers.
-The sample below shows the default formatting:
 
-```csharp
-formatter.SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");
+ExceptionLayouts can also be added explicitely
+
+```csharp 
+ExceptionFormatter.Create()
+    .AddExceptionLayout(new DbEntityValidationExceptionLayout()); 
 ```
 
-#### Text Renderers
+## ExceptionLayout Samples
 
-Text renderers should be written as ```${renderer}```
+```csharp
+    public class OptimisticConcurrencyExceptionLayout : IExceptionLayout<OptimisticConcurrencyException>
+    {
+        public string FormatException(IFormatter formatter, OptimisticConcurrencyException ex)
+        {
+            var entities = ex.StateEntries.Select(x => formatter.PrettyPrint(x.Entity));
 
-Available text renderers:
+            return formatter.GetFormattedException(ex, entities);
+        }
+    }
+```
 
-| 				 |   								    |
-| -------------- | ------------------------------------ |
-| exceptionType  |	exceptionTypeName					|
-| message	     |  ex.Message							|
-| stackTrace	 |  ex.StackTrace						|
-| dictionary	 |  ex.Data								|
-| additionalInfo |  specific information about the exception   |
+```csharp
+    public class DbUpdateExceptionLayout : IExceptionLayout<DbUpdateException>
+    {
+        public string FormatException(IFormatter formatter, DbUpdateException ex)
+        {
+            var validationErrors = new List<string>();
 
+            try
+            {
+                string PrettyPrint(PropertyValues props) => formatter.PrettyPrint(props.ToObject());
 
-Available text renderers:
+                validationErrors.AddRange(ex.Entries.Select(x => x.State == EntityState.Added
+                    ? $@"Current:\n\n{PrettyPrint(x.CurrentValues)}"
+                    : $@"Original:\n\n{PrettyPrint(x.OriginalValues)}\n\n\Current:\n\n{PrettyPrint(x.CurrentValues)} "));
+            }
+            catch (Exception e)
+            {
+                validationErrors.Add($"DbUpdateExceptionLayout: {e.Message}");
+                validationErrors.AddRange(ex.Entries.Select(x => formatter.PrettyPrint(x.Entity)));
+            }
 
-| 				 |   								    |
-| -------------- | ------------------------------------ |
-| exceptionType  |	exceptionTypeName					|
-| message	     |  ex.Message							|
-| stackTrace	 |  ex.StackTrace						|
-| dictionary	 |  ex.Data								|
-| additionalInfo |  specific information about the exception   |
+            return formatter.GetFormattedException(ex, validationErrors);
+        }
+    }
+```
+
+```csharp
+    public class ReflectionTypeLoadExceptionLayout : IExceptionLayout<ReflectionTypeLoadException>
+    {
+        public string FormatException(IFormatter formatter, ReflectionTypeLoadException ex)
+        {
+            var msg = $"Unable to load:\n{string.Join("\n", ex.Types.Select(x => x.Name))}\n";
+
+            return formatter.GetFormattedException(ex, msg);
+        }
+    }
+```
+
+```csharp
+    public class SqlExceptionLayout : IExceptionLayout<SqlException>
+    {
+        public string FormatException(IFormatter formatter, SqlException ex)
+        {
+            formatter.SetLayout("[${exceptionType}: ${message}]\n${additionalInfo}\n${stacktrace}");
+
+            return formatter.GetFormattedException(ex);
+        }
+    }
+```
