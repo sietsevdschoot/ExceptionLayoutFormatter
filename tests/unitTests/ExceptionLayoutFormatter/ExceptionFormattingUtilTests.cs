@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using ExceptionLayoutFormatter;
 using FluentAssertions;
 using Xunit;
@@ -21,6 +22,53 @@ namespace UnitTests.ExceptionLayoutFormatter
             var actual = RenderMessage("Message\n\n${additionalInfo}\n\n${message}");
 
             actual.Should().Be("Message\n\nHello World!");
+        }
+
+        [Fact]
+        public void GetFormattedException_serializes_dictionary_if_available()
+        {
+            // Arrange
+            var ex = new ArgumentException("MyTest");
+            ex.Data["MyObject"] = new Person
+            {
+                Name = "MyTest",
+                Address = "MyAddress",
+                LuckyNumbers = new[] { 10, 11, 12 }
+            };
+
+            // Act
+            var actual = RenderMessage(ex, "${message}\n\n${dictionary}");
+
+            // Assert
+            actual.Should().MatchEquivalentOf("*MyTest*MyAddress*");
+        }
+
+        [Fact]
+        public void GetFormattedException_can_serializes_dictionary_with_null_value()
+        {
+            // Arrange
+            var ex = new ArgumentException("MyTest");
+            ex.Data["MyObject"] = null;
+
+            // Act
+            var actual = RenderMessage(ex, "${message}\n\n${dictionary}");
+
+            // Assert
+            actual.Should().MatchEquivalentOf("*MyTest*MyObject*");
+        }
+
+        [Fact]
+        public void GetFormattedException_does_not_serialize_empty_dictionary()
+        {
+            // Arrange
+            var ex = new ArgumentException("MyTest");
+            ex.Data.Clear();
+
+            // Act
+            var actual = RenderMessage(ex, "${message}\n\n${dictionary}");
+
+            // Assert
+            actual.Should().NotMatchEquivalentOf("*{}*");
         }
 
         [Fact]
@@ -51,6 +99,11 @@ namespace UnitTests.ExceptionLayoutFormatter
 
         private string RenderMessage(string layout, string message = "Hello World!", string additionalInfo = null)
         {
+            return RenderMessage(new Exception(message), layout, additionalInfo);
+        }
+
+        private string RenderMessage(Exception exception, string layout, string additionalInfo = null)
+        {
             var formatter = new ExceptionFormattingUtil();
             formatter.SetLayout(layout);
 
@@ -58,7 +111,7 @@ namespace UnitTests.ExceptionLayoutFormatter
 
             try
             {
-                throw new Exception(message);
+                throw exception;
             }
             catch (Exception ex)
             {
@@ -68,4 +121,13 @@ namespace UnitTests.ExceptionLayoutFormatter
             return formattedMessage;
         }
     }
+
+    [Serializable]
+    internal class Person
+    {
+        public string Name { get; set; }
+        public string Address { get; set; }
+        public int[] LuckyNumbers { get; set; }
+    }
+
 }

@@ -56,10 +56,11 @@ namespace UnitTests.ExceptionLayoutFormatter
         }
 
         [Fact]
-        public void FormatException_can_format_generic_exceptions()
+        public void FormatException_can_format_generic_exceptions_using_generic_exception_layout()
         {
             // Arrange
-            var formatter = ExceptionFormatter.Create(typeof(CustomerExceptionLayout).Assembly);
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout(typeof(GenericFaultExceptionLayout<>));
 
             // Act
             var actual = formatter.FormatException(new FaultException<CalculationError>(new CalculationError
@@ -68,7 +69,7 @@ namespace UnitTests.ExceptionLayoutFormatter
             }));
 
             // Assert
-            actual.Should().MatchEquivalentOf("*MyReason*");
+            actual.Should().MatchEquivalentOf("*CalculationError*MyReason*");
         }
 
         [Fact]
@@ -91,65 +92,21 @@ namespace UnitTests.ExceptionLayoutFormatter
             var formatter = ExceptionFormatter.Create()
                 .AddExceptionLayout(new DefaultExceptionLayout())
                 .AddExceptionLayout(new CustomerExceptionLayout())
-                .AddExceptionLayout(new CustomerNotFoundExceptionLayout())
-                .AddExceptionLayout(typeof(GenericFaultExceptionLayout<>));
+                .AddExceptionLayout(new CustomerNotFoundExceptionLayout());
 
             var ex = new AggregateException(
                 new CustomerNotFoundException("", 
                     new CustomerException("", 
-                        new Exception("", 
-                            new FaultException<CalculationError>(new CalculationError
-                            {
-                                Reason = "MyReason"
-
-                            })))));
+                        new Exception(""))));
 
             var names = formatter.FormatException(ex);
 
             names.Should().MatchEquivalentOf(string.Join("*",
-                "*FaultException<CalculationError>**",
                 "DefaultExceptionLayout",
                 "CustomerExceptionLayout",
                 "CustomerNotFoundExceptionLayout",
                 "DefaultExceptionLayout*"
             ));
-        }
-
-        [Fact]
-        public void FormatException_serializes_dictionary_if_available()
-        {
-            // Arrange
-            var formatter = ExceptionFormatter.Create();
-
-            var ex = new ArgumentException("MyTest");
-            ex.Data["MyObject"] = new Person
-            {
-                Name = "MyTest",
-                Address = "MyAddress",
-                LuckyNumbers = new[] { 10, 11, 12 }
-            };
-
-            // Act
-            var actual = formatter.FormatException(ex);
-
-            // Assert
-            actual.Should().MatchEquivalentOf("*MyTest*MyAddress*");
-        }
-
-        [Fact]
-        public void FormatException_can_serializes_dictionary_with_null_value()
-        {
-            // Arrange
-            var formatter = ExceptionFormatter.Create();
-
-            var ex = new ArgumentException("MyTest");
-            ex.Data["MyObject"] = null;
-
-            // Act
-            var actual = formatter.FormatException(ex);
-
-            // Assert
-            actual.Should().MatchEquivalentOf("*MyTest*MyObject*");
         }
 
         [Fact]
@@ -166,13 +123,27 @@ namespace UnitTests.ExceptionLayoutFormatter
         }
 
         [Fact]
+        public void FormatException_When_exception_in_layout_falls_back_to_defaultExceptionLayout()
+        {
+            // Arrange
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout(new ExceptionThrowingLayout());
+
+            // Act
+            var actual = formatter.FormatException(new OrderException("Order failed"));
+
+            // Assert
+            actual.Should().MatchEquivalentOf("*An error* in *ExceptionThrowingLayout*falling back*Order failed*");
+        }
+
+        [Fact]
         public void Can_add_exceptionLayouts_by_scanning_assemblies()
         {
             // Arrange && Assert
             var formatter = ExceptionFormatter.Create(this.GetType().Assembly);
 
             // Assert
-            formatter.ExceptionLayouts.Should().NotBeEmpty();
+            ((ExceptionFormatter)formatter).ExceptionLayouts.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -182,19 +153,22 @@ namespace UnitTests.ExceptionLayoutFormatter
             var formatter = ExceptionFormatter.Create()
                 .AddExceptionLayout(new DefaultExceptionLayout())
                 .AddExceptionLayout(new CustomerExceptionLayout())
-                .AddExceptionLayout(new FaultExceptionLayout())
-                ;
+                .AddExceptionLayout(new FaultExceptionLayout());
 
             // Assert
             formatter.ExceptionLayouts.Should().HaveCount(3);
         }
-
-        [Serializable]
-        internal class Person
+ 
+        [Fact]
+        public void AddExceptionLayout_adds_exceptionLayout_to_formatter_by_type()
         {
-            public string Name { get; set; }
-            public string Address { get; set; }
-            public int[] LuckyNumbers { get; set; }
+            // Arrange && Assert
+            var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout(new DefaultExceptionLayout())
+                .AddExceptionLayout(typeof(GenericFaultExceptionLayout<>));
+
+            // Assert
+            formatter.ExceptionLayouts.Should().HaveCount(2);
         }
     }
 }

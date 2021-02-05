@@ -35,7 +35,9 @@ namespace ExceptionLayoutFormatter
                 {"Message", x => x.Exception.Message},
                 {"Stacktrace", x => x.Exception.StackTrace},
                 {"AdditionalInfo", x => x.AdditionalInfo},
-                {"Dictionary", x => PrettyPrint(x.Exception.Data)},
+                {"Dictionary", x => x.Exception.Data.Keys.Count > 0 
+                    ? PrettyPrint(x.Exception.Data) 
+                    : null },
             };
 
             SetLayout("[${exceptionType}: ${message}]\n${dictionary}\n${additionalInfo}\n${stacktrace}");

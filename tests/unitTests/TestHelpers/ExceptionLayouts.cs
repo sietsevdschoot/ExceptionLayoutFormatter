@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Diagnostics;
 using System.ServiceModel;
 using ExceptionLayoutFormatter;
@@ -34,6 +35,23 @@ namespace UnitTests.TestHelpers
     }
 
     [DebuggerStepThrough]
+    public class FaultExceptionLayout : IExceptionLayout<FaultException>
+    {
+        public string FormatException(IFormatter formatter, FaultException ex)
+        {
+            var fault = formatter.PrettyPrint(new
+            {
+                Reason = ex.Reason.ToString(),
+                Action = ex.Action,
+                Code = ex.Code?.Name,
+                SubCode = ex.Code?.SubCode?.ToString(),
+            });
+
+            return formatter.GetFormattedException(ex, fault);
+        }
+    }
+
+    [DebuggerStepThrough]
     public class GenericFaultExceptionLayout<T> : IExceptionLayout<FaultException<T>>
     {
         public string FormatException(IFormatter formatter, FaultException<T> ex)
@@ -51,20 +69,11 @@ namespace UnitTests.TestHelpers
         }
     }
 
-    [DebuggerStepThrough]
-    public class FaultExceptionLayout : IExceptionLayout<FaultException>
+    public class ExceptionThrowingLayout : IExceptionLayout<OrderException>
     {
-        public string FormatException(IFormatter formatter, FaultException ex)
+        public string FormatException(IFormatter formatter, OrderException ex)
         {
-            var fault = formatter.PrettyPrint(new
-            {
-                Reason = ex.Reason.ToString(),
-                Action = ex.Action,
-                Code = ex.Code?.Name,
-                SubCode = ex.Code?.SubCode?.ToString(),
-            });
-
-            return formatter.GetFormattedException(ex, fault);
+            throw new InvalidOperationException("An error occured in ExceptionLayout");
         }
     }
 

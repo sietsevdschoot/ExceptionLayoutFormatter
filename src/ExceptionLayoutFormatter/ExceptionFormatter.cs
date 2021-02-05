@@ -6,39 +6,48 @@ using ExceptionLayoutFormatter.ExceptionLayouts;
 
 namespace ExceptionLayoutFormatter
 {
-    public class ExceptionFormatter
+    public class ExceptionFormatter : IExceptionFormatter
     {
         private readonly ExceptionExtractor _extractor;
         private readonly ExceptionLayoutFormatter _formatter;
+        private readonly ExceptionLayoutsCollection _exceptionLayouts;
 
-        public ExceptionFormatter(ExceptionLayoutFormatter formatter, ExceptionExtractor extractor)
+        public ExceptionFormatter(
+            ExceptionLayoutsCollection exceptionLayouts,
+            ExceptionExtractor extractor, 
+            ExceptionLayoutFormatter formatter)
         {
+            _exceptionLayouts = exceptionLayouts;
             _formatter = formatter;
             _extractor = extractor;
         }
 
-        public static ExceptionFormatter Create(params Assembly[] assemblies)
+        public static IExceptionFormatter Create(params Assembly[] assemblies)
         {
-            var layoutFormatter = new ExceptionLayoutFormatter();
+            var exceptionLayouts = new ExceptionLayoutsCollection()
+                .AddExceptionLayout(new ExceptionLayout());
 
             foreach (var assembly in assemblies)
             {
-                layoutFormatter.AddExceptionLayouts(assembly);
+                exceptionLayouts.AddExceptionLayouts(assembly);
             }
-
-            return new ExceptionFormatter(layoutFormatter, new ExceptionExtractor());
+                
+            return new ExceptionFormatter(
+                exceptionLayouts: exceptionLayouts,
+                extractor: new ExceptionExtractor(),
+                formatter: new ExceptionLayoutFormatter(exceptionLayouts));
         }
 
         public ExceptionFormatter AddExceptionLayout<TException>(IExceptionLayout<TException> layout) where TException : Exception
         {
-            _formatter.AddLayoutFormatter(layout);
+            _exceptionLayouts[typeof(TException)] = runtimeExceptionType => layout;
             
             return this;
         }
 
         public ExceptionFormatter AddExceptionLayout(Type layoutType)
         {
-            _formatter.AddLayoutFormatter(layoutType);
+            _exceptionLayouts.AddExceptionLayout(layoutType);
             
             return this;
         }
@@ -57,6 +66,13 @@ namespace ExceptionLayoutFormatter
             return string.Join(Environment.NewLine, formattedExceptions);
         }
 
-        internal List<IExceptionLayout> ExceptionLayouts => _formatter.ExceptionLayouts;
+        internal List<IExceptionLayout> ExceptionLayouts => _exceptionLayouts.ToList();
+    }
+
+    public interface IExceptionFormatter
+    {
+        ExceptionFormatter AddExceptionLayout<TException>(IExceptionLayout<TException> layout) where TException : Exception;
+        ExceptionFormatter AddExceptionLayout(Type layoutType);
+        string FormatException(Exception exception);
     }
 }

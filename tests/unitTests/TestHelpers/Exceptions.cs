@@ -22,12 +22,28 @@ namespace UnitTests.TestHelpers
         public CustomerNotFoundException(string message, Exception innerException)
             : base(message, innerException)
         {
-
         }
 
         public CustomerNotFoundException()
         {
         }
+    }
 
+    [DebuggerStepThrough]
+    public class OrderException : Exception
+    {
+        public OrderException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+
+        }
+
+        public OrderException(string message) : base(message)
+        {
+        }
+
+        public OrderException()
+        {
+        }
     }
 }

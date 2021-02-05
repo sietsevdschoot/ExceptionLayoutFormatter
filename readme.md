@@ -190,12 +190,8 @@ Available text renderers:
             return formatter.GetFormattedException(ex, fault);
         }
     }
-
-    public class CalculationError
-    {
-        public string Reason { get; set; }
-    }
 ```
+
 ```csharp
     public class GenericFaultExceptionLayout<T> : IExceptionLayout<FaultException<T>>
     {
