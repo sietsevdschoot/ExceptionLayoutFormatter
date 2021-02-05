@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ServiceModel;
 using ExceptionLayoutFormatter;
 using FluentAssertions;
 using UnitTests.TestHelpers;
@@ -55,6 +56,22 @@ namespace UnitTests.ExceptionLayoutFormatter
         }
 
         [Fact]
+        public void FormatException_can_format_generic_exceptions()
+        {
+            // Arrange
+            var formatter = ExceptionFormatter.Create(typeof(CustomerExceptionLayout).Assembly);
+
+            // Act
+            var actual = formatter.FormatException(new FaultException<CalculationError>(new CalculationError
+            {
+                Reason = "MyReason"
+            }));
+
+            // Assert
+            actual.Should().MatchEquivalentOf("*MyReason*");
+        }
+
+        [Fact]
         public void FormatException_when_exceptionType_not_found_uses_default_exception_layout()
         {
             // Arrange
@@ -72,25 +89,30 @@ namespace UnitTests.ExceptionLayoutFormatter
         public void FormatException_Uses_formatters_for_exceptionTypes()
         {
             var formatter = ExceptionFormatter.Create()
+                .AddExceptionLayout(new DefaultExceptionLayout())
                 .AddExceptionLayout(new CustomerExceptionLayout())
                 .AddExceptionLayout(new CustomerNotFoundExceptionLayout())
-                .AddExceptionLayout(new DefaultExceptionLayout());
+                .AddExceptionLayout(typeof(GenericFaultExceptionLayout<>));
 
             var ex = new AggregateException(
                 new CustomerNotFoundException("", 
-                    new CustomerException("", new Exception())));
+                    new CustomerException("", 
+                        new Exception("", 
+                            new FaultException<CalculationError>(new CalculationError
+                            {
+                                Reason = "MyReason"
+
+                            })))));
 
             var names = formatter.FormatException(ex);
 
-            names
-                .Split(new []{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
-                .Should().ContainInOrder
-            (
+            names.Should().MatchEquivalentOf(string.Join("*",
+                "*FaultException<CalculationError>**",
                 "DefaultExceptionLayout",
                 "CustomerExceptionLayout",
                 "CustomerNotFoundExceptionLayout",
-                "DefaultExceptionLayout"
-            );
+                "DefaultExceptionLayout*"
+            ));
         }
 
         [Fact]
@@ -159,10 +181,12 @@ namespace UnitTests.ExceptionLayoutFormatter
             // Arrange && Assert
             var formatter = ExceptionFormatter.Create()
                 .AddExceptionLayout(new DefaultExceptionLayout())
-                .AddExceptionLayout(new CustomerExceptionLayout());
+                .AddExceptionLayout(new CustomerExceptionLayout())
+                .AddExceptionLayout(new FaultExceptionLayout())
+                ;
 
             // Assert
-            formatter.ExceptionLayouts.Should().HaveCount(2);
+            formatter.ExceptionLayouts.Should().HaveCount(3);
         }
 
         [Serializable]

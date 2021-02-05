@@ -174,3 +174,43 @@ Available text renderers:
         }
     }
 ```
+```csharp
+    public class FaultExceptionLayout : IExceptionLayout<FaultException>
+    {
+        public string FormatException(IFormatter formatter, FaultException ex)
+        {
+            var fault = formatter.PrettyPrint(new
+            {
+                Reason = ex.Reason.ToString(),
+                Action = ex.Action,
+                Code = ex.Code?.Name,
+                SubCode = ex.Code?.SubCode?.ToString(),
+            });
+
+            return formatter.GetFormattedException(ex, fault);
+        }
+    }
+
+    public class CalculationError
+    {
+        public string Reason { get; set; }
+    }
+```
+```csharp
+    public class GenericFaultExceptionLayout<T> : IExceptionLayout<FaultException<T>>
+    {
+        public string FormatException(IFormatter formatter, FaultException<T> ex)
+        {
+            var fault = formatter.PrettyPrint(new
+            {
+                Reason = ex.Reason.ToString(),
+                Action = ex.Action,
+                Code = ex.Code?.Name,
+                SubCode = ex.Code?.SubCode?.ToString(),
+                Detail = ex.Detail
+            });
+
+            return formatter.GetFormattedException(ex, fault);
+        }
+    }
+```

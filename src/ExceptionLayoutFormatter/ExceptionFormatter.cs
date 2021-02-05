@@ -36,6 +36,13 @@ namespace ExceptionLayoutFormatter
             return this;
         }
 
+        public ExceptionFormatter AddExceptionLayout(Type layoutType)
+        {
+            _formatter.AddLayoutFormatter(layoutType);
+            
+            return this;
+        }
+
         public string FormatException(Exception exception)
         {
             var allExceptions = _extractor.ExtractAllExceptions(exception);
