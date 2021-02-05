@@ -24,13 +24,14 @@ namespace ExceptionLayoutFormatter
             }
             catch (Exception e)
             {
-                var defaultExceptionLayout = _exceptionLayouts.FindMatchingExceptionLayout<Exception>();
+                var defaultLayout = _exceptionLayouts.FindMatchingExceptionLayout<Exception>();
+                var formattingUtil = new ExceptionFormattingUtil();
 
                 formattedException = string.Format(
                     "Exception in '{0}'\n{1}\nFalling back to default ExceptionLayout.\n\nOriginal Exception:\n{2}",
                     exceptionLayout.GetType().FullName, 
-                    defaultExceptionLayout.FormatException(new ExceptionFormattingUtil(), e), 
-                    defaultExceptionLayout.FormatException(new ExceptionFormattingUtil(), ex));
+                    defaultLayout.FormatException(formattingUtil, e), 
+                    defaultLayout.FormatException(formattingUtil, ex));
             }
 
             return formattedException;

@@ -8,7 +8,7 @@ This allows you to get detailed exception messages together with all valuable in
 * Adding important value by serializing specific metadata of specialized Exceptions. 
 * Provides an easy extendable way to format exceptions according to preference.  
 * Robust implementation with fallback if any error occurs.
-* Supports layouts for generic exceptions like for example ```FaultException<T>```
+* Supports layouts for generic exceptions like ```FaultException<T>```
 
 ## How to use
 

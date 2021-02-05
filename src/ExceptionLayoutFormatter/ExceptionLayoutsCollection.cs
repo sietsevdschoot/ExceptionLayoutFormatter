@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using ExceptionLayoutFormatter.ExceptionLayouts;
@@ -8,8 +9,12 @@ using ExceptionLayoutFormatter.Extensions;
 
 namespace ExceptionLayoutFormatter
 {
+    [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
     public class ExceptionLayoutsCollection : IEnumerable<IExceptionLayout>
     {
+        /// <summary>
+        /// <code> IDictionary<ExceptionTypeFromLayout, Func<RuntimeExceptionType, IExceptionType>> </code>
+        /// </summary>
         private readonly IDictionary<Type, Func<Type, IExceptionLayout>> _exceptionLayoutResolvers;
 
         public ExceptionLayoutsCollection()

@@ -11,7 +11,10 @@ if ($credentialFile.Exists) {
 
     $nugetApiKey = (Get-Content $credentialFile.FullName -Raw).Trim()
 }
-
+elseif (!$credentialFile.Exists -and $pushToNuget) {
+    
+    throw "Can't find credentialFile '$($credentialFile.FullName)'"    
+}
 
 Function Get-ProjectInfo {
     param(
