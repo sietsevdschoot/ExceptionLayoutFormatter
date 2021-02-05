@@ -45,7 +45,7 @@ namespace ExceptionLayoutFormatter
 
         public void AddExceptionLayout(Type layoutType)
         {
-            if (layoutType.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout)))
+            if (!layoutType.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExceptionLayout<>)))
                 throw new ArgumentException("Should implement IExceptionLayout<T>", nameof(layoutType));
             if (!layoutType.IsClass || layoutType.IsAbstract)
                 throw new ArgumentException("Should be an implementation of IExceptionLayout<T>", nameof(layoutType));
@@ -59,8 +59,8 @@ namespace ExceptionLayoutFormatter
 
                 _exceptionLayoutResolvers[genericExceptionTypeFromLayout] = runtimeExceptionType =>
                 {
-                    var exceptionPayloadType = runtimeExceptionType.GetGenericArguments().FirstOrDefault() ?? new { Dummy = "true" }.GetType();
-                    var genericLayoutTypeForCurrentException = layoutType.GetGenericTypeDefinition().MakeGenericType(exceptionPayloadType);
+                    var runtimeExceptionPayloadType = runtimeExceptionType.GetGenericArguments().FirstOrDefault() ?? new { Dummy = "true" }.GetType();
+                    var genericLayoutTypeForCurrentException = layoutType.GetGenericTypeDefinition().MakeGenericType(runtimeExceptionPayloadType);
 
                     return (IExceptionLayout)Activator.CreateInstance(genericLayoutTypeForCurrentException);
                 };

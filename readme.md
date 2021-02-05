@@ -38,7 +38,7 @@ Custom ExceptionLayouts can be added by scanning one or more assemblies.
 ExceptionFormatter.Create(typeof(OptimisticConcurrencyExceptionLayout).Assembly); 
 ```
 
-ExceptionLayouts can also be added explicitely
+ExceptionLayouts can be added explicitely
 
 ```csharp 
 ExceptionFormatter.Create()
