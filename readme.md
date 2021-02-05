@@ -45,6 +45,13 @@ ExceptionFormatter.Create()
     .AddExceptionLayout(new DbEntityValidationExceptionLayout()); 
 ```
 
+Or by type
+
+```csharp 
+ExceptionFormatter.Create()
+    .AddExceptionLayout(typeof(GenericFaultExceptionLayout<>)); 
+```
+
 ### Adding custom  ExceptionLayouts
 
 To implement a layout for a given exception you have to implement the ```IExceptionLayout<TException>``` interface.
