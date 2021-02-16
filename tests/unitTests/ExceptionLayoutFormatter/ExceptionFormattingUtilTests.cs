@@ -82,7 +82,7 @@ namespace UnitTests.ExceptionLayoutFormatter
         [Fact]
         public void SetLayout_SettingsDuplicatesThrows()
         {
-            var action = new Action(() => RenderMessage("{message}\n\n{message}"));
+            var action = new Action(() => RenderMessage("${message}\n\n${message}"));
 
             action.Should().Throw<ArgumentException>();
         }
