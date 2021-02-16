@@ -87,7 +87,7 @@ namespace ExceptionLayoutFormatter
             if (string.IsNullOrEmpty(layout))
                 throw new ArgumentNullException(nameof(layout));
 
-            var foundKeywords = Regex.Matches(layout, "\\${(.*?)}").Cast<Match>().Select(x => x.Value.Trim('$','{', '}')).ToList();
+            var foundKeywords = Regex.Matches(layout, @"\${(.*?)}").Cast<Match>().Select(x => x.Value.Trim('$','{', '}')).ToList();
 
             if (foundKeywords.GroupBy(x => x).Any(x => x.Count() > 1))
                 throw new ArgumentException($"Duplicate keywords found in: {string.Join(", ", foundKeywords)}");
