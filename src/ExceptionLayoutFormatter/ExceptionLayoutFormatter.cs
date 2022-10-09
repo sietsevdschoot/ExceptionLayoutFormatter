@@ -11,7 +11,7 @@ namespace ExceptionLayoutFormatter
             _exceptionLayouts = exceptionLayouts;
         }
 
-        public string CreateFormattedExceptionString<TException>(TException ex)
+        public string CreateFormattedExceptionString<TException>(TException exception)
             where TException : Exception
         {
             var exceptionLayout = _exceptionLayouts.FindMatchingExceptionLayout<TException>();
@@ -20,9 +20,9 @@ namespace ExceptionLayoutFormatter
 
             try
             {
-                formattedException = exceptionLayout.FormatException(new ExceptionFormattingUtil(),  ex);
+                formattedException = exceptionLayout.FormatException(new ExceptionFormattingUtil(), exception);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 var defaultLayout = _exceptionLayouts.FindMatchingExceptionLayout<Exception>();
                 var formattingUtil = new ExceptionFormattingUtil();
@@ -30,8 +30,8 @@ namespace ExceptionLayoutFormatter
                 formattedException = string.Format(
                     "Exception in '{0}'\n{1}\nFalling back to default ExceptionLayout.\n\nOriginal Exception:\n{2}",
                     exceptionLayout.GetType().FullName, 
-                    defaultLayout.FormatException(formattingUtil, e), 
-                    defaultLayout.FormatException(formattingUtil, ex));
+                    defaultLayout.FormatException(formattingUtil, ex), 
+                    defaultLayout.FormatException(formattingUtil, exception));
             }
 
             return formattedException;

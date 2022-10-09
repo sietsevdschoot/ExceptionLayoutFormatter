@@ -26,7 +26,8 @@ namespace ExceptionLayoutFormatter
                 Converters = new List<JsonConverter>
                 {
                     new StringEnumConverter()
-                }
+                },
+                MaxDepth = 128,
             };
 
             _keywords = new Dictionary<string, Func<(Exception Exception, string AdditionalInfo), string>>(StringComparer.InvariantCultureIgnoreCase)
@@ -54,7 +55,7 @@ namespace ExceptionLayoutFormatter
         {
             var formattedException = _layout;
 
-            var foundKeywords = Regex.Matches(_layout, @"\${(.*?)}").Cast<Match>().Select(x => x.Value).ToList();
+            var foundKeywords = Regex.Matches(_layout, @"\${(.*?)}").Select(x => x.Value).ToList();
 
             foreach (var foundKeyword in foundKeywords)
             {
@@ -87,7 +88,7 @@ namespace ExceptionLayoutFormatter
             if (string.IsNullOrEmpty(layout))
                 throw new ArgumentNullException(nameof(layout));
 
-            var foundKeywords = Regex.Matches(layout, @"\${(.*?)}").Cast<Match>().Select(x => x.Value.Trim('$','{', '}')).ToList();
+            var foundKeywords = Regex.Matches(layout, @"\${(.*?)}").Select(x => x.Value.Trim('$','{', '}')).ToList();
 
             if (foundKeywords.GroupBy(x => x).Any(x => x.Count() > 1))
                 throw new ArgumentException($"Duplicate keywords found in: {string.Join(", ", foundKeywords)}");
