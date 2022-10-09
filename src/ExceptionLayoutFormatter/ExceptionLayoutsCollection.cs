@@ -82,15 +82,15 @@ namespace ExceptionLayoutFormatter
             // Generic match
             if (typeof(TException).IsGenericType)
             {
-                matchingLayoutResolver = matchingLayoutResolver ?? _exceptionLayoutResolvers
+                matchingLayoutResolver ??= _exceptionLayoutResolvers
                     .GetValueOrDefault(typeof(TException).GetGenericTypeDefinition());
             }
 
             // BaseType match
-            matchingLayoutResolver = matchingLayoutResolver ?? _exceptionLayoutResolvers
-                    .Where(x => x.Key != typeof(Exception) && x.Key.IsAssignableFrom(typeof(TException)))
-                    .Select(x => x.Value)
-                    .FirstOrDefault();
+            matchingLayoutResolver ??= _exceptionLayoutResolvers
+                .Where(x => x.Key != typeof(Exception) && x.Key.IsAssignableFrom(typeof(TException)))
+                .Select(x => x.Value)
+                .FirstOrDefault();
 
             // Default ExceptionLayout
             var layoutResolver = matchingLayoutResolver ?? _exceptionLayoutResolvers[typeof(Exception)];

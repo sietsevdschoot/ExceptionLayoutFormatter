@@ -36,7 +36,7 @@ namespace ExceptionLayoutFormatter
             {
                 innerExceptions = ex.GetType().GetProperties()
                     .Where(x => typeof(IEnumerable<Exception>).IsAssignableFrom(x.PropertyType))
-                    .SelectMany(x => (IEnumerable<Exception>) x.GetValue(ex))
+                    .SelectMany(x => (IEnumerable<Exception>)x.GetValue(ex))
                     .Concat(new List<Exception> {ex.InnerException})
                     .Distinct();
             }
